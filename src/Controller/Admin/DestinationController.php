@@ -7,13 +7,12 @@ use App\Entity\Images;
 use App\Form\DestinationFormType;
 use App\Repository\DestinationRepository;
 use App\Service\PictureService;
-use Cocur\Slugify\Slugify;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 /**
  * @Route("/admin/destinations", name="admin_destinations_")
@@ -34,7 +33,7 @@ class DestinationController extends AbstractController
     /**
      * @Route("/ajout", name="add")
      */
-    public function add(Request $request, EntityManagerInterface $em, PictureService $pictureService): Response
+    public function add(Request $request, EntityManagerInterface $em, PictureService $pictureService, SluggerInterface $slugger): Response
     {
         
 
@@ -67,10 +66,10 @@ class DestinationController extends AbstractController
                 $destination->addImage($img);
             }
 
-            $slug = new Slugify();
+            $slug = $slugger->slug($destination->getDestination());
 
             // On genere le slug
-            $destination->setSlug($slug->slugify($destination->getDestination()));
+            $destination->setSlug($slug);
 
         
             $em->persist($destination);
@@ -94,7 +93,7 @@ class DestinationController extends AbstractController
     /**
      * @Route("/edition/{id}", name="edit")
      */
-    public function edit(Destination $destination,EntityManagerInterface $em, Request $request, PictureService $pictureService): Response
+    public function edit(Destination $destination,EntityManagerInterface $em, Request $request, PictureService $pictureService, SluggerInterface $slugger): Response
     {
         
 
@@ -121,10 +120,13 @@ class DestinationController extends AbstractController
             }
 
 
-            $slug = new Slugify();
+            $slug = $slugger->slug($destination->getDestination());
 
             // On genere le slug
-            $destination->setSlug($slug->slugify($destination->getDestination()));
+            $destination->setSlug($slug);
+
+
+           
 
 
             $em->persist($destination);
